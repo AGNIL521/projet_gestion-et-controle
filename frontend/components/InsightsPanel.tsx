@@ -2,14 +2,10 @@
 
 import React from 'react';
 import { Lightbulb, TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react';
+import { PredictionResponse } from '../types';
 
 interface InsightsProps {
-  prediction: {
-    next_month_revenue_forecast: number;
-    confidence_score: number;
-    trend: string;
-    alert: string | null;
-  } | null;
+  prediction: PredictionResponse | null;
   scenario: string;
 }
 

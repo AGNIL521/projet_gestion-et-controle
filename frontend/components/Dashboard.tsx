@@ -9,28 +9,13 @@ import { TrendingUp, TrendingDown, DollarSign, Target } from 'lucide-react';
 import ScenarioSelector from './ScenarioSelector';
 import InsightsPanel from './InsightsPanel';
 import DataInputPanel from './DataInputPanel';
+import { PredictionResponse, StatusResponse, SalesRecord } from '../types';
 
-interface PredictionResponse {
-  next_month_revenue_forecast: number;
-  confidence_score: number;
-  trend: "up" | "down" | "stable";
-  alert: string | null;
+interface DashboardProps {
+  onLogout: () => void;
 }
 
-interface StatusResponse {
-  current_month_revenue: number;
-  target: number;
-  performance_gap: number;
-}
-
-interface SalesRecord {
-  date: string;
-  revenue: number;
-  units_sold: number;
-  region: string;
-}
-
-const Dashboard = () => {
+const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const [prediction, setPrediction] = useState<PredictionResponse | null>(null);
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [history, setHistory] = useState<SalesRecord[]>([]);
@@ -124,8 +109,16 @@ const Dashboard = () => {
           <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">PerfOptima AI</h1>
           <p className="text-gray-500 mt-1">Intelligent Organizational Control System</p>
         </div>
-        <div className="mt-4 md:mt-0 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200 text-sm font-medium text-gray-600">
-          Demo Mode: <span className="text-indigo-600">v2.0 (Live Simulation)</span>
+        <div className="flex items-center space-x-4 mt-4 md:mt-0">
+             <div className="bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200 text-sm font-medium text-gray-600">
+              Demo Mode: <span className="text-indigo-600">v2.0 (Live Simulation)</span>
+            </div>
+            <button 
+                onClick={onLogout}
+                className="bg-white hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg shadow-sm border border-gray-200 text-sm font-medium transition-colors"
+            >
+                Sign Out
+            </button>
         </div>
       </header>
 
