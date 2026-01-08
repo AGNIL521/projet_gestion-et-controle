@@ -1,8 +1,10 @@
-from fastapi import FastAPI, HTTPException, Body, Depends
+from fastapi import FastAPI, HTTPException, Body, Depends, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List, Optional
 import uvicorn
+import pandas as pd
+import io
 
 from .models import SalesDataInput, PredictionResponse, SalesRecord, ManualOverrideInput
 from .ml_engine import SalesForecaster, DataSimulator
@@ -51,6 +53,48 @@ def on_startup():
 @app.get("/")
 def read_root():
     return {"message": "PerfOptima AI System Ready. Operational (Persistent Mode)."}
+
+@app.post("/api/upload")
+async def upload_data(file: UploadFile = File(...), db: Session = Depends(get_db)):
+    """
+    Uploads a CSV file to replace the current dataset.
+    CSV Format: date (YYYY-MM-DD), revenue, units_sold, region
+    """
+    if not file.filename.endswith('.csv'):
+        raise HTTPException(status_code=400, detail="Invalid file format. Please upload a CSV.")
+    
+    try:
+        contents = await file.read()
+        df = pd.read_csv(io.StringIO(contents.decode('utf-8')))
+        
+        # Validation
+        required_cols = ['date', 'revenue', 'units_sold', 'region']
+        if not all(col in df.columns for col in required_cols):
+             raise HTTPException(status_code=400, detail=f"Missing columns. Required: {required_cols}")
+        
+        # Clear existing data
+        db.query(SalesRecordDB).delete()
+        
+        # Insert new data
+        for _, row in df.iterrows():
+            db_record = SalesRecordDB(
+                date=pd.to_datetime(row['date']).date(),
+                revenue=float(row['revenue']),
+                units_sold=int(row['units_sold']),
+                region=str(row['region'])
+            )
+            db.add(db_record)
+        
+        # Update System State to 'custom'
+        scenario_setting = db.query(SystemStateDB).filter(SystemStateDB.key == "current_scenario").first()
+        if scenario_setting:
+            scenario_setting.value = "custom"
+        
+        db.commit()
+        return {"message": "Data uploaded successfully", "records_processed": len(df)}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to process file: {str(e)}")
 
 @app.post("/api/override")
 def set_override(data: ManualOverrideInput, db: Session = Depends(get_db)):
@@ -139,7 +183,7 @@ def get_current_status(db: Session = Depends(get_db)):
     }
 
 @app.get("/api/predict", response_model=PredictionResponse)
-def predict_performance(db: Session = Depends(get_db)):
+def predict_performance(model_type: str = "linear", db: Session = Depends(get_db)):
     """
     Analyzes the CURRENT active scenario and returns a forecast.
     """
@@ -152,7 +196,7 @@ def predict_performance(db: Session = Depends(get_db)):
             region=r.region
         ) for r in records]
         
-        result = forecaster.predict(history_data)
+        result = forecaster.predict(history_data, model_type=model_type)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.pipeline import make_pipeline
 from datetime import date, timedelta
 from .models import SalesRecord, PredictionResponse
 
@@ -51,9 +53,13 @@ class DataSimulator:
 
 class SalesForecaster:
     def __init__(self):
-        self.model = LinearRegression()
+        self.models = {
+            "linear": LinearRegression(),
+            "polynomial": make_pipeline(PolynomialFeatures(degree=2), LinearRegression()),
+            "polynomial_high": make_pipeline(PolynomialFeatures(degree=3), LinearRegression())
+        }
     
-    def predict(self, history: list[SalesRecord]) -> PredictionResponse:
+    def predict(self, history: list[SalesRecord], model_type: str = "linear") -> PredictionResponse:
         if not history:
             return PredictionResponse(
                 next_month_revenue_forecast=0.0,
@@ -79,18 +85,29 @@ class SalesForecaster:
         # Weights grow exponentially: 1, 1.1, 1.21...
         weights = np.power(1.15, df['month_index'])
         
-        # Train with weights
-        self.model.fit(X, y, sample_weight=weights)
+        # Select and Train Model
+        model = self.models.get(model_type, self.models["linear"])
+        
+        # Handle sample_weight for Pipeline vs Regressor
+        if hasattr(model, 'fit'):
+             # Pipelines accept fit params via **kwargs, but simpler to just try/except or check type
+             # Standard LinearRegression accepts sample_weight directly
+             # Pipeline: step_name__sample_weight
+             if "pipeline" in str(type(model)).lower():
+                 # For pipeline, we pass weights to the 'linearregression' step
+                 model.fit(X, y, linearregression__sample_weight=weights)
+             else:
+                 model.fit(X, y, sample_weight=weights)
         
         # Predict next month
         next_index = len(df)
-        prediction = self.model.predict([[next_index]])[0]
+        prediction = model.predict(pd.DataFrame({'month_index': [next_index]}))[0]
         
         # Calculate Trend
         # Compare prediction to the LAST ACTUAL value, not just the slope
         last_actual = df['revenue'].iloc[-1]
-        slope = self.model.coef_[0]
-
+        
+        # Slope calculation depends on model, so we use point-to-point comparison for robustness
         if prediction > last_actual * 1.05:
             trend = "up"
         elif prediction < last_actual * 0.95:
@@ -100,10 +117,13 @@ class SalesForecaster:
         
         # Logic for Alerts & Confidence
         # Calculate R-squared (simple confidence metric)
-        r2_score = self.model.score(X, y, sample_weight=weights)
+        if "pipeline" in str(type(model)).lower():
+            r2_score = model.score(X, y, linearregression__sample_weight=weights)
+        else:
+            r2_score = model.score(X, y, sample_weight=weights)
         
         # Linearity Check: Calculate standard deviation of residuals
-        predictions_on_history = self.model.predict(X)
+        predictions_on_history = model.predict(X)
         residuals = y - predictions_on_history
         residual_std = np.std(residuals)
         mean_revenue = np.mean(y)

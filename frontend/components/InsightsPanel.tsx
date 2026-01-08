@@ -23,15 +23,24 @@ const InsightsPanel: React.FC<InsightsProps> = ({ prediction, scenario }) => {
   const recommendation = getRecommendation(scenario, prediction.trend);
 
   return (
-    <div className="bg-gradient-to-br from-indigo-900 to-slate-800 text-white p-6 rounded-xl shadow-lg">
+    <div 
+      className="text-white p-6 rounded-xl shadow-lg"
+      style={{ background: 'linear-gradient(to bottom right, #312e81, #1e293b)' }} // Safe gradient
+    >
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
-            <div className="p-2 bg-indigo-500/20 rounded-lg backdrop-blur-sm">
+            <div 
+              className="p-2 rounded-lg"
+              style={{ backgroundColor: 'rgba(99, 102, 241, 0.2)' }} // bg-indigo-500/20
+            >
             <Lightbulb className="w-6 h-6 text-yellow-300" />
             </div>
             <h3 className="text-xl font-bold tracking-wide">AI Strategic Insights</h3>
         </div>
-        <span className="text-[10px] font-bold uppercase tracking-widest bg-white/10 px-2 py-1 rounded text-indigo-200">
+        <span 
+          className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded text-indigo-200"
+          style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }} // bg-white/10
+        >
             {scenario} Mode
         </span>
       </div>
@@ -54,10 +63,16 @@ const InsightsPanel: React.FC<InsightsProps> = ({ prediction, scenario }) => {
         </div>
 
         {/* Risk Assessment */}
-        <div className="bg-white/5 p-4 rounded-lg border border-white/10">
+        <div 
+          className="p-4 rounded-lg"
+          style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }} // bg-white/5 border-white/10
+        >
           <div className="flex justify-between items-center mb-2">
             <span className="text-indigo-200 text-xs font-semibold uppercase">Confidence Level</span>
-            <span className={`text-xs font-bold px-2 py-1 rounded ${prediction.confidence_score > 0.8 ? 'bg-green-500/20 text-green-300' : 'bg-yellow-500/20 text-yellow-300'}`}>
+            <span 
+              className={`text-xs font-bold px-2 py-1 rounded ${prediction.confidence_score > 0.8 ? 'text-green-300' : 'text-yellow-300'}`}
+              style={{ backgroundColor: prediction.confidence_score > 0.8 ? 'rgba(34, 197, 94, 0.2)' : 'rgba(234, 179, 8, 0.2)' }}
+            >
               {(prediction.confidence_score * 100).toFixed(0)}%
             </span>
           </div>
@@ -71,7 +86,10 @@ const InsightsPanel: React.FC<InsightsProps> = ({ prediction, scenario }) => {
 
         {/* Actionable Advice */}
         {prediction.alert && (
-          <div className="flex items-start space-x-3 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+          <div 
+            className="flex items-start space-x-3 p-4 rounded-lg"
+            style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)' }} // bg-red-500/10
+          >
             <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" />
             <div className="space-y-1">
               <span className="text-red-200 text-xs font-bold uppercase">Critical Alert</span>
@@ -80,7 +98,10 @@ const InsightsPanel: React.FC<InsightsProps> = ({ prediction, scenario }) => {
           </div>
         )}
         
-        <div className="p-4 bg-indigo-500/10 border border-indigo-500/30 rounded-lg">
+        <div 
+          className="p-4 rounded-lg"
+          style={{ backgroundColor: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.3)' }} // bg-indigo-500/10
+        >
             <span className="text-indigo-300 text-xs font-bold uppercase block mb-1">Strategic Recommendation</span>
             <p className="text-sm text-indigo-100 italic">
                "{recommendation}"

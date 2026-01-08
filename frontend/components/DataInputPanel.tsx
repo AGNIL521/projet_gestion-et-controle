@@ -23,7 +23,7 @@ const DataInputPanel: React.FC<DataInputProps> = ({ onUpdate, isLoading }) => {
     return (
       <button 
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-8 right-8 bg-indigo-600 text-white p-4 rounded-full shadow-lg hover:bg-indigo-700 transition-all z-50 flex items-center gap-2"
+        className="fixed bottom-8 right-8 bg-yellow-500 text-white p-4 rounded-full shadow-lg hover:bg-yellow-600 transition-all z-50 flex items-center gap-2"    
       >
         <Settings className="w-6 h-6" />
         <span className="font-medium">Adjust Data</span>
@@ -32,13 +32,13 @@ const DataInputPanel: React.FC<DataInputProps> = ({ onUpdate, isLoading }) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-in fade-in zoom-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md p-6 animate-in fade-in zoom-in duration-200 transition-colors">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-bold text-gray-900">Manual Data Entry</h3>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white">Manual Data Entry</h3>
           <button 
             onClick={() => setIsOpen(false)}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
           >
             ✕
           </button>
@@ -46,28 +46,28 @@ const DataInputPanel: React.FC<DataInputProps> = ({ onUpdate, isLoading }) => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Current Month Revenue ($)
             </label>
             <input
               type="number"
               value={revenue}
               onChange={(e) => setRevenue(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:border-indigo-500 outline-none transition-all"
               placeholder="e.g. 12500"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Target Revenue ($)
             </label>
             <input
               type="number"
               value={target}
               onChange={(e) => setTarget(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:border-indigo-500 outline-none transition-all"
               placeholder="e.g. 15000"
               required
             />
@@ -88,7 +88,7 @@ const DataInputPanel: React.FC<DataInputProps> = ({ onUpdate, isLoading }) => {
             </button>
           </div>
           
-          <p className="text-xs text-center text-gray-500">
+          <p className="text-xs text-center text-gray-500 dark:text-gray-400">
             This will update the latest data point and recalibrate the AI forecast.
           </p>
         </form>
